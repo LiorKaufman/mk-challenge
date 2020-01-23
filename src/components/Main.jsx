@@ -60,10 +60,9 @@ const defaultErrors = {
 export default function Main() {
   const [values, setValues] = useState(defaultValues);
   const [errors, setErrors] = useState(defaultErrors);
-  const form = document.querySelector("#form");
   const submitResponse = document.querySelector("#response");
   const formURL =
-    "https://ol0pu01uq4.execute-api.us-west-2.amazonaws.com/Prod/submitForm";
+    "https://vlsr7pbgzi.execute-api.us-west-2.amazonaws.com/Prod/submitForm";
   const classes = useStyles();
 
   document.title = "MK Challenge";
