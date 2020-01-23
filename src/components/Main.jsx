@@ -12,7 +12,6 @@ import { makeStyles } from "@material-ui/core/styles";
 import Container from "@material-ui/core/Container";
 
 // Icons
-import ContactMailIcon from "@material-ui/icons/ContactMail";
 
 function Copyright() {
   return (
@@ -61,6 +60,10 @@ const defaultErrors = {
 export default function Main() {
   const [values, setValues] = useState(defaultValues);
   const [errors, setErrors] = useState(defaultErrors);
+  const form = document.querySelector("#form");
+  const submitResponse = document.querySelector("#response");
+  const formURL =
+    "https://ol0pu01uq4.execute-api.us-west-2.amazonaws.com/Prod/submitForm";
   const classes = useStyles();
 
   document.title = "MK Challenge";
@@ -92,79 +95,114 @@ export default function Main() {
     event.preventDefault();
     handleErrors();
     if (handleErrors()) {
-      console.log("will call the api here");
+      handleSubmit(event);
       resetForm();
     }
   };
 
+  const muiInputs = () => {
+    return (
+      <div>
+        <CssBaseline />
+        <div className={classes.paper}>
+          <Typography component="h1" variant="h5">
+            Contact me
+          </Typography>
+          <TextField
+            error={Boolean(errors.nameError)}
+            helperText={Boolean(errors.nameError) ? errors.nameError : ""}
+            variant="outlined"
+            margin="normal"
+            fullWidth
+            name="name"
+            label="Name"
+            type="text"
+            placeholder="name"
+            id="name"
+            onChange={handleChange}
+            value={values.name}
+          />
+          <TextField
+            error={Boolean(errors.emailError)}
+            helperText={Boolean(errors.emailError) ? errors.emailError : ""}
+            variant="outlined"
+            margin="normal"
+            fullWidth
+            id="email"
+            label="Email Address"
+            name="email"
+            placeholder="email address"
+            autoComplete="email"
+            autoFocus
+            onChange={handleChange}
+            value={values.email}
+          />
+          <TextField
+            error={Boolean(errors.messageError)}
+            helperText={Boolean(errors.messageError) ? errors.messageError : ""}
+            fullWidth
+            id="outlined-multiline-static"
+            label="message"
+            multiline
+            rows="4"
+            name="message"
+            placeholder="Message"
+            variant="outlined"
+            onChange={handleChange}
+            value={values.message}
+          />
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            color="primary"
+            className={classes.submit}
+          >
+            Send
+          </Button>
+        </div>
+        <Box mt={8}>
+          <Copyright />
+        </Box>
+      </div>
+    );
+  };
+
+  const handleSubmit = e => {
+    e.preventDefault();
+
+    console.log("Sending: ", JSON.stringify(values));
+    submitResponse.innerHTML = "Sending...";
+    // Create the AJAX request
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", formURL);
+    xhr.setRequestHeader("Accept", "application/json; charset=utf-8");
+    xhr.setRequestHeader("Content-Type", "application/json; charset=UTF-8");
+
+    // Send the collected data as JSON
+    xhr.send(JSON.stringify(values));
+
+    xhr.onloadend = response => {
+      if (response.target.status === 200) {
+        submitResponse.innerHTML = "Success";
+      } else {
+        submitResponse.innerHTML = "Error! Please try again.";
+        console.error(JSON.parse(response));
+      }
+    };
+  };
+
   return (
     <Container component="main" maxWidth="xs">
-      <CssBaseline />
-      <div className={classes.paper}>
-        <Avatar className={classes.avatar}>
-          <ContactMailIcon />
-        </Avatar>
-        <Typography component="h1" variant="h5">
-          Contact me
-        </Typography>
-        <TextField
-          error={Boolean(errors.nameError)}
-          helperText={Boolean(errors.nameError) ? errors.nameError : ""}
-          variant="outlined"
-          margin="normal"
-          fullWidth
-          name="name"
-          label="Name"
-          type="text"
-          placeholder="name"
-          id="name"
-          onChange={handleChange}
-          value={values.name}
-        />
-        <TextField
-          error={Boolean(errors.emailError)}
-          helperText={Boolean(errors.emailError) ? errors.emailError : ""}
-          variant="outlined"
-          margin="normal"
-          fullWidth
-          id="email"
-          label="Email Address"
-          name="email"
-          placeholder="email address"
-          autoComplete="email"
-          autoFocus
-          onChange={handleChange}
-          value={values.email}
-        />
-        <TextField
-          error={Boolean(errors.messageError)}
-          helperText={Boolean(errors.messageError) ? errors.messageError : ""}
-          fullWidth
-          id="outlined-multiline-static"
-          label="message"
-          multiline
-          rows="4"
-          name="message"
-          placeholder="Message"
-          variant="outlined"
-          onChange={handleChange}
-          value={values.message}
-        />
-
-        <Button
-          type="submit"
-          fullWidth
-          variant="contained"
-          color="primary"
-          onClick={handleSend}
-          className={classes.submit}
-        >
-          Send
-        </Button>
+      <div className="card">
+        <div className="card-body">
+          <form id="form" method="POST" onSubmit={handleSend}>
+            <h2>My serverless form</h2>
+            <div className="form-group">{muiInputs()}</div>
+            <h4 id="response"></h4>
+          </form>
+        </div>
       </div>
-      <Box mt={8}>
-        <Copyright />
-      </Box>
     </Container>
   );
 }
